@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#8b1e3f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="宝塚情報">
+  <title>宝塚情報取得アプリ</title>
+  <style>
+    :root{
+      --bg:#fff8fb;--panel:#ffffff;--line:#ead6e0;--text:#2e2230;--muted:#7b6573;--brand:#8b1e3f;--brand-soft:#f6e6ed;
+      --accent:#b14465;--ok:#0c8a5a;--warn:#a15b00;--shadow:0 8px 24px rgba(70,26,44,.08);--radius:18px;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;background:linear-gradient(180deg,#fff8fb 0%,#fdf4f7 100%);color:var(--text)}
+    button,input,select{font:inherit}
+    .app{max-width:720px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 14px calc(env(safe-area-inset-bottom) + 20px)}
+    .hero{background:linear-gradient(135deg,#8b1e3f 0%,#b14465 100%);color:#fff;border-radius:24px;padding:18px;box-shadow:var(--shadow);position:sticky;top:0;z-index:10}
+    .hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .title{font-weight:800;font-size:22px;line-height:1.2;margin:0}
+    .sub{font-size:12px;opacity:.9;margin-top:6px;line-height:1.5}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+    .btn{border:none;background:#fff;color:var(--brand);padding:12px 14px;border-radius:14px;font-weight:700;min-height:44px;cursor:pointer}
+    .btn.secondary{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.28)}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+    .stat{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:10px}
+    .stat .n{font-size:20px;font-weight:800}
+    .stat .l{font-size:11px;opacity:.9;margin-top:2px}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:14px;margin-top:14px;box-shadow:var(--shadow)}
+    .section-title{font-size:16px;font-weight:800;margin:0 0 10px}
+    .status{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted)}
+    .badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 10px;border:1px solid var(--line);background:#fff}
+    .badge.ok{color:var(--ok);border-color:#bbe6d4;background:#f0fbf6}
+    .badge.warn{color:var(--warn);border-color:#f1d1ab;background:#fff8ef}
+    .filters{display:grid;gap:10px}
+    .search{width:100%;min-height:46px;border-radius:14px;border:1px solid var(--line);padding:0 14px;background:#fff}
+    .chips{display:flex;gap:8px;overflow:auto;padding-bottom:2px}
+    .chip{white-space:nowrap;border-radius:999px;border:1px solid var(--line);background:#fff;padding:10px 12px;font-size:13px;color:var(--text)}
+    .chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
+    .list{display:grid;gap:12px}
+    .card{border:1px solid var(--line);background:#fff;border-radius:18px;padding:14px}
+    .meta{font-size:12px;color:var(--muted);line-height:1.5}
+    .card h3{font-size:16px;line-height:1.5;margin:8px 0 8px}
+    .card p{font-size:13px;line-height:1.7;color:#5a4956;margin:0}
+    .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+    .tag{font-size:11px;font-weight:700;border-radius:999px;padding:5px 8px}
+    .theme-公演{background:#fce8ef;color:#922047}
+    .theme-スター{background:#efe9ff;color:#6137d2}
+    .theme-配信・放送{background:#e9f1ff;color:#2359b8}
+    .theme-商品{background:#fef2df;color:#9a5a00}
+    .theme-会員・チケット{background:#ebfff4;color:#12774a}
+    .theme-学校・イベント{background:#fff0fa;color:#a13d83}
+    .theme-公演スケジュール{background:#f2ebff;color:#6d3fe7}
+    .theme-その他{background:#f3f4f6;color:#5b6470}
+    .tag.troupe{background:#f7edf2;color:#7a4d62}
+    .tag.new{background:#e9fff0;color:#08814f}
+    .link{display:inline-block;margin-top:12px;color:var(--brand);font-weight:800}
+    .empty{padding:20px;text-align:center;color:var(--muted);font-size:13px}
+    .footer{margin:18px 0 8px;text-align:center;color:var(--muted);font-size:12px;line-height:1.6}
+  </style>
+</head>
+<body>
+<div class="app">
+  <section class="hero">
+    <div class="hero-top">
+      <div>
+        <h1 class="title">宝塚情報取得アプリ</h1>
+        <div class="sub">iPhone向け完全1ファイル版 / 開いたとき読込 + 更新ボタン対応</div>
+      </div>
+      <button id="refreshBtn" class="btn" type="button">更新</button>
+    </div>
+    <div class="actions">
+      <button id="showAllBtn" class="btn secondary" type="button">全件</button>
+      <button id="showPickupBtn" class="btn secondary" type="button">注目</button>
+      <button id="scrollTopBtn" class="btn secondary" type="button">上へ</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n" id="totalCount">0</div><div class="l">総件数</div></div>
+      <div class="stat"><div class="n" id="newCount">0</div><div class="l">NEW</div></div>
+      <div class="stat"><div class="n" id="scheduleCount">0</div><div class="l">公演日程</div></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2 class="section-title">更新状態</h2>
+    <div class="status">
+      <span class="badge" id="runtimeStatus">起動中</span>
+      <span class="badge" id="sourceStatus">読込待ち</span>
+      <span class="badge" id="updatedAtBadge">データ更新日: -</span>
+      <span class="badge" id="loadedAtBadge">アプリ読込時刻: -</span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2 class="section-title">検索・絞り込み</h2>
+    <div class="filters">
+      <input id="searchBox" class="search" type="search" placeholder="タイトル・概要で検索">
+      <div class="chips" id="themeChips"></div>
+      <div class="chips" id="troupeChips"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="pickupPanel">
+    <h2 class="section-title">注目情報</h2>
+    <div class="list" id="pickupList"></div>
+  </section>
+
+  <section class="panel">
+    <h2 class="section-title">一覧</h2>
+    <div class="list" id="mainList"></div>
+  </section>
+
+  <div class="footer">
+    この版は完全1ファイル版です。<br>
+    外部JSONやPythonは不要です。<br>
+    「更新」は内蔵データを再読込します。最新情報そのものを自動取得する機能は入っていません。
+  </div>
+</div>
+
+<script>
+const EMBEDDED_DATA = {
+  "appName": "宝塚情報取得アプリ",
+  "version": "v0.3.0",
+  "updatedAt": "2026-03-20 19:00",
+  "sourceMode": "embedded-single-file",
+  "items": [
+    {
+      "title": "＜ライブ中継・ライブ配信＞星組公演『恋する天動説』『DYNAMIC NOVA』",
+      "summary": "公式ニュース一覧に 2026.03.20 NEW の公演情報として掲載。",
+      "published": "2026-03-20",
+      "theme": "公演",
+      "troupes": ["星組"],
+      "isNew": true,
+      "kind": "news",
+      "link": "https://kageki.hankyu.co.jp/news/index.html",
+      "source": "宝塚歌劇 公式ニュース"
+    },
+    {
+      "title": "宝塚歌劇Webチケットサービス システムメンテナンスのご案内",
+      "summary": "公式ニュース一覧に 2026.03.19 のその他情報として掲載。",
+      "published": "2026-03-19",
+      "theme": "その他",
+      "troupes": ["全組共通"],
+      "isNew": true,
+      "kind": "news",
+      "link": "https://kageki.hankyu.co.jp/news/index.html",
+      "source": "宝塚歌劇 公式ニュース"
+    },
+    {
+      "title": "＜ライブ中継・ライブ配信＞花組公演『蒼月抄』『EL DESEO』",
+      "summary": "公式ニュース一覧に 2026.03.19 の公演情報として掲載。",
+      "published": "2026-03-19",
+      "theme": "公演",
+      "troupes": ["花組"],
+      "isNew": true,
+      "kind": "news",
+      "link": "https://kageki.hankyu.co.jp/news/index.html",
+      "source": "宝塚歌劇 公式ニュース"
+    },
+    {
+      "title": "＜出演者決定＞花組 全国ツアー公演『マジシャンの憂鬱』『EXCITER!!2026』",
+      "summary": "公式ニュース一覧に 2026.03.19 の公演情報として掲載。",
+      "published": "2026-03-19",
+      "theme": "公演",
+      "troupes": ["花組"],
+      "isNew": true,
+      "kind": "news",
+      "link": "https://kageki.hankyu.co.jp/news/index.html",
+      "source": "宝塚歌劇 公式ニュース"
+    },
+    {
+      "title": "「宝塚GRAPH4月号」発売【ebooksタカラヅカでも同時発売！】",
+      "summary": "公式ニュース一覧に 2026.03.19 の商品情報として掲載。",
+      "published": "2026-03-19",
+      "theme": "商品",
+      "troupes": ["専科","花組","月組","雪組","星組","宙組"],
+      "isNew": true,
+      "kind": "news",
+      "link": "https://kageki.hankyu.co.jp/news/index.html",
+      "source": "宝塚歌劇 公式ニュース"
+    },
+    {
+      "title": "宝塚友の会 チケット先行販売「第2抽選方式」 宙組 宝塚大劇場公演『黒蜥蜴』『Diamond IMPULSE』",
+      "summary": "宙組大劇場公演向けチケット先行販売情報。",
+      "published": "2026-03-18",
+      "theme": "会員・チケット",
+      "troupes": ["宙組"],
+      "isNew": true,
+      "kind": "news",
+      "link": "https://kageki.hankyu.co.jp/news/all_cosmos.html",
+      "source": "宝塚歌劇 公式ニュース"
+    },
+    {
+      "title": "花組公演『蒼月抄』『EL DESEO』",
+      "summary": "宝塚大劇場 2026年2月14日〜3月29日 / 東京宝塚劇場 2026年4月18日〜5月31日。",
+      "published": "2026-02-14",
+      "theme": "公演スケジュール",
+      "troupes": ["花組"],
+      "isNew": false,
+      "kind": "schedule",
+      "link": "https://kageki.hankyu.co.jp/revue/2026/sogetsusho/index.html",
+      "source": "宝塚歌劇 公演案内"
+    },
+    {
+      "title": "宙組公演『黒蜥蜴』『Diamond IMPULSE』",
+      "summary": "宝塚大劇場 2026年5月23日〜7月5日 / 東京宝塚劇場 2026年7月25日〜9月6日。",
+      "published": "2026-05-23",
+      "theme": "公演スケジュール",
+      "troupes": ["宙組"],
+      "isNew": false,
+      "kind": "schedule",
+      "link": "https://kageki.hankyu.co.jp/revue/2026/kurotokage/index.html",
+      "source": "宝塚歌劇 公演案内"
+    },
+    {
+      "title": "星組公演『恋する天動説』『DYNAMIC NOVA』",
+      "summary": "宝塚大劇場 2026年1月1日〜2月8日 / 東京宝塚劇場 2026年2月28日〜4月12日。",
+      "published": "2026-01-01",
+      "theme": "公演スケジュール",
+      "troupes": ["星組"],
+      "isNew": false,
+      "kind": "schedule",
+      "link": "https://kageki.hankyu.co.jp/revue/2026/koisurutendosetsu/index.html",
+      "source": "宝塚歌劇 公演案内"
+    },
+    {
+      "title": "宝塚音楽学校 第112期生卒業式",
+      "summary": "2026年3月2日に卒業式を実施。第112期生は宙組公演『黒蜥蜴』『Diamond IMPULSE』で初舞台予定。",
+      "published": "2026-03-02",
+      "theme": "学校・イベント",
+      "troupes": ["宙組"],
+      "isNew": false,
+      "kind": "news",
+      "link": "https://kageki.hankyu.co.jp/news/20260302_001.html",
+      "source": "宝塚歌劇 公式ニュース"
+    }
+  ]
+};
+
+const CACHE_KEY = 'takarazuka_info_cache_v030_single';
+const STATE = {raw: [], theme: 'ALL', troupe: 'ALL'};
+const THEME_ORDER = ['ALL','公演','公演スケジュール','会員・チケット','配信・放送','スター','商品','学校・イベント','その他'];
+
+function qs(id){ return document.getElementById(id); }
+function escapeHtml(s){ return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function formatDate(s){ return s || '-'; }
+function nowText(){
+  const d = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+function setBadge(el, text, cls=''){ el.textContent = text; el.className = 'badge' + (cls ? ' ' + cls : ''); }
+function saveCache(data){ try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch(e) {} }
+function loadCache(){ try { return JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); } catch(e) { return null; } }
+function scoreItem(item){
+  let score = 1;
+  if (item.isNew) score += 2;
+  if (item.kind === 'schedule') score += 1;
+  if (['公演','公演スケジュール','会員・チケット'].includes(item.theme)) score += 1;
+  return score;
+}
+
+function deepCopyData(){ return JSON.parse(JSON.stringify(EMBEDDED_DATA)); }
+
+function applyData(data, runtimeText, sourceText, cls=''){
+  STATE.raw = [...(data.items || [])].sort((a,b)=> String(b.published).localeCompare(String(a.published)));
+  qs('totalCount').textContent = STATE.raw.length;
+  qs('newCount').textContent = STATE.raw.filter(x=>x.isNew).length;
+  qs('scheduleCount').textContent = STATE.raw.filter(x=>x.kind==='schedule').length;
+  setBadge(qs('runtimeStatus'), runtimeText, cls);
+  setBadge(qs('sourceStatus'), sourceText);
+  setBadge(qs('updatedAtBadge'), `データ更新日: ${data.updatedAt || '-'}`);
+  setBadge(qs('loadedAtBadge'), `アプリ読込時刻: ${nowText()}`);
+  renderChips();
+  renderLists();
+}
+
+function refreshFromEmbedded(mode){
+  const data = deepCopyData();
+  saveCache(data);
+  applyData(
+    data,
+    mode === 'manual' ? '更新しました' : '起動時に読込しました',
+    '取得元: このHTML内蔵データ',
+    'ok'
+  );
+}
+
+function renderChips(){
+  const themes = Array.from(new Set(STATE.raw.map(x=>x.theme))).sort((a,b)=>THEME_ORDER.indexOf(a)-THEME_ORDER.indexOf(b));
+  const troupes = ['ALL', ...Array.from(new Set(STATE.raw.flatMap(x=>x.troupes || [])))];
+  qs('themeChips').innerHTML = THEME_ORDER.filter(x=>x==='ALL' || themes.includes(x)).map(x =>
+    `<button class="chip ${STATE.theme===x?'active':''}" data-kind="theme" data-value="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join('');
+  qs('troupeChips').innerHTML = troupes.map(x =>
+    `<button class="chip ${STATE.troupe===x?'active':''}" data-kind="troupe" data-value="${escapeHtml(x)}">${escapeHtml(x)}</button>`).join('');
+  document.querySelectorAll('.chip').forEach(btn => {
+    btn.onclick = () => {
+      if (btn.dataset.kind === 'theme') STATE.theme = btn.dataset.value;
+      if (btn.dataset.kind === 'troupe') STATE.troupe = btn.dataset.value;
+      renderChips();
+      renderLists();
+    };
+  });
+}
+
+function getFilteredItems(){
+  const q = qs('searchBox').value.trim().toLowerCase();
+  return STATE.raw.filter(item => {
+    const matchQ = !q || `${item.title} ${item.summary} ${item.source}`.toLowerCase().includes(q);
+    const matchTheme = STATE.theme === 'ALL' || item.theme === STATE.theme;
+    const matchTroupe = STATE.troupe === 'ALL' || (item.troupes || []).includes(STATE.troupe);
+    return matchQ && matchTheme && matchTroupe;
+  });
+}
+
+function cardHtml(item){
+  const themeClass = `theme-${item.theme}`;
+  const troupeTags = (item.troupes || []).map(x => `<span class="tag troupe">${escapeHtml(x)}</span>`).join('');
+  return `
+    <article class="card">
+      <div class="meta">${escapeHtml(item.source)} / ${escapeHtml(formatDate(item.published))}</div>
+      <h3>${escapeHtml(item.title)}</h3>
+      <p>${escapeHtml(item.summary)}</p>
+      <div class="tags">
+        <span class="tag ${themeClass}">${escapeHtml(item.theme)}</span>
+        ${troupeTags}
+        ${item.isNew ? '<span class="tag new">NEW</span>' : ''}
+      </div>
+      <a class="link" href="${escapeHtml(item.link)}" target="_blank" rel="noopener noreferrer">公式ページを開く</a>
+    </article>`;
+}
+
+function renderLists(){
+  const filtered = getFilteredItems();
+  const pickup = [...filtered]
+    .sort((a,b)=>scoreItem(b)-scoreItem(a) || String(b.published).localeCompare(String(a.published)))
+    .slice(0,5);
+  qs('pickupList').innerHTML = pickup.length ? pickup.map(cardHtml).join('') : '<div class="empty">該当する注目情報はありません。</div>';
+  qs('mainList').innerHTML = filtered.length ? filtered.map(cardHtml).join('') : '<div class="empty">該当データがありません。</div>';
+}
+
+qs('refreshBtn').onclick = () => refreshFromEmbedded('manual');
+qs('searchBox').addEventListener('input', renderLists);
+qs('showAllBtn').onclick = () => document.querySelector('#mainList').scrollIntoView({behavior:'smooth', block:'start'});
+qs('showPickupBtn').onclick = () => document.querySelector('#pickupPanel').scrollIntoView({behavior:'smooth', block:'start'});
+qs('scrollTopBtn').onclick = () => window.scrollTo({top:0, behavior:'smooth'});
+
+window.addEventListener('load', () => {
+  const cached = loadCache();
+  if (cached) {
+    applyData(cached, '保存済みデータを表示中', '取得元: iPhone保存データ', 'warn');
+    setTimeout(() => refreshFromEmbedded('auto'), 80);
+  } else {
+    refreshFromEmbedded('auto');
+  }
+});
+</script>
+</body>
+</html>
