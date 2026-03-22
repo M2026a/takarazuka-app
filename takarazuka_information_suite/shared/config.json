@@ -1,0 +1,8 @@
+{
+  "app_name": "Takarazuka Information Suite",
+  "version": "0.1.0",
+  "history_days": 45,
+  "new_badge_hours": 24,
+  "max_news_items": 150,
+  "detail_fetch_limit": 35
+}

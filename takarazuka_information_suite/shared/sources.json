@@ -1,0 +1,66 @@
+[
+  {
+    "name": "宝塚歌劇 公式ニュース（全体）",
+    "kind": "news_html",
+    "url": "https://kageki.hankyu.co.jp/news/index.html",
+    "lang": "ja",
+    "official": true,
+    "allowed_domains": ["kageki.hankyu.co.jp", "shop.tca-pictures.net", "www.tca-pictures.net", "youtu.be", "youtube.com"]
+  },
+  {
+    "name": "宝塚歌劇 公式ニュース（公演）",
+    "kind": "news_html",
+    "url": "https://kageki.hankyu.co.jp/news/revue.html",
+    "lang": "ja",
+    "official": true,
+    "allowed_domains": ["kageki.hankyu.co.jp", "youtu.be", "youtube.com"]
+  },
+  {
+    "name": "宝塚歌劇 公式ニュース（スター）",
+    "kind": "news_html",
+    "url": "https://kageki.hankyu.co.jp/news/star.html",
+    "lang": "ja",
+    "official": true,
+    "allowed_domains": ["kageki.hankyu.co.jp"]
+  },
+  {
+    "name": "宝塚歌劇 公式ニュース（商品）",
+    "kind": "news_html",
+    "url": "https://kageki.hankyu.co.jp/news/goods.html",
+    "lang": "ja",
+    "official": true,
+    "allowed_domains": ["kageki.hankyu.co.jp", "shop.tca-pictures.net", "www.tca-pictures.net"]
+  },
+  {
+    "name": "宝塚歌劇 公式ニュース（配信・放送）",
+    "kind": "news_html",
+    "url": "https://kageki.hankyu.co.jp/news/broadcast.html",
+    "lang": "ja",
+    "official": true,
+    "allowed_domains": ["kageki.hankyu.co.jp", "youtu.be", "youtube.com"]
+  },
+  {
+    "name": "宝塚歌劇 公式ニュース（お知らせ）",
+    "kind": "news_html",
+    "url": "https://kageki.hankyu.co.jp/news/info.html",
+    "lang": "ja",
+    "official": true,
+    "allowed_domains": ["kageki.hankyu.co.jp"]
+  },
+  {
+    "name": "宝塚歌劇 公演案内（大劇場・東京）",
+    "kind": "performance_html",
+    "url": "https://kageki.hankyu.co.jp/revue/index.html",
+    "lang": "ja",
+    "official": true,
+    "allowed_domains": ["kageki.hankyu.co.jp"]
+  },
+  {
+    "name": "宝塚歌劇 公演案内（その他の劇場）",
+    "kind": "performance_html",
+    "url": "https://kageki.hankyu.co.jp/revue/other.html",
+    "lang": "ja",
+    "official": true,
+    "allowed_domains": ["kageki.hankyu.co.jp"]
+  }
+]
