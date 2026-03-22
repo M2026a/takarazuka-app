@@ -482,7 +482,8 @@ def page_shell(title: str, active: str, body: str, items: list[dict]) -> str:
     news_count = sum(1 for x in items if x['kind'] == 'news')
     schedule_count = sum(1 for x in items if x['kind'] == 'schedule')
     new_count = sum(1 for x in items if x.get('is_new'))
-    updated = datetime.now().strftime('%Y-%m-%d %H:%M')
+    from zoneinfo import ZoneInfo
+    updated = datetime.now(ZoneInfo("Asia/Tokyo")).strftime('%Y-%m-%d %H:%M')
     navs = [
         ('index.html', 'メイン'), ('pickup.html', '注目情報'), ('themes.html', 'テーマ別'),
         ('troupe.html', '組別'), ('schedule.html', '公演スケジュール'), ('analysis.html', '分析')
