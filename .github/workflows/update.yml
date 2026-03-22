@@ -1,7 +1,9 @@
 name: HTMLを更新する
 
 on:
-  workflow_dispatch:  # 手動実行のみ
+  workflow_dispatch:  # 手動実行
+  schedule:
+    - cron: '0 */6 * * *'  # 6時間おきに自動実行（UTC基準）
 
 jobs:
   build:
