@@ -1,0 +1,40 @@
+name: HTMLを更新する
+
+on:
+  workflow_dispatch:  # 手動実行のみ
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Python をセットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 依存パッケージをインストール
+        run: pip install -r takarazuka_information_suite/requirements.txt
+
+      - name: Python スクリプトを実行（HTML生成）
+        run: python takarazuka_information_suite/takarazuka_info/takarazuka_info.py
+
+      - name: 生成されたHTMLをルートにコピー
+        run: |
+          cp takarazuka_information_suite/takarazuka_info/output/index.html    ./index.html
+          cp takarazuka_information_suite/takarazuka_info/output/pickup.html   ./pickup.html
+          cp takarazuka_information_suite/takarazuka_info/output/themes.html   ./themes.html
+          cp takarazuka_information_suite/takarazuka_info/output/troupe.html   ./troupe.html
+          cp takarazuka_information_suite/takarazuka_info/output/schedule.html ./schedule.html
+          cp takarazuka_information_suite/takarazuka_info/output/analysis.html ./analysis.html
+
+      - name: 変更をコミット＆プッシュ
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add *.html
+          git diff --staged --quiet || git commit -m "chore: HTMLを自動更新 $(date +'%Y-%m-%d %H:%M') JST"
+          git push
